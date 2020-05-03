@@ -1,6 +1,6 @@
 var ROOMKEY = document.getElementById("globals").getAttribute("room-key");
 var NAME = '';
-const SOCKET = io(window.location.host);
+const SOCKET = io();
 
 // Prevents input from having injected markup
 const CLEANINPUT = (input) => {
