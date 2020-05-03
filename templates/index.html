@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Chess World</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link href="/static/css/style.css" type="text/css" rel="stylesheet"/>
+	</head>
+
+	<body>
+		<div class="form">
+			<div>
+				<button id="create-room">Create Game</button><br><br><br>
+				<form id="join-game">
+				  Room key: <input type="text" id="roomKey"><br><br>
+				  <input type="submit" value="Join Game">
+				</form>
+			</div>
+			<div>
+				<p id="error-text"></p>
+			</div>
+		</div>
+
+		<script src="/static/lib/jquery.min.js"></script>
+		<script src="/static/index.js"></script>
+
+	</body>
+</html>

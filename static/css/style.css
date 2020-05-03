@@ -1,0 +1,101 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #cce0ff;
+  height: 100%;
+  overflow: hidden;
+}
+
+ul {
+  list-style: none;
+  word-wrap: break-word;
+}
+
+li {
+  margin-bottom: 5px;
+}
+
+.header {
+  padding: 20px;
+  background: rgba(0, 0, 0, 0);
+  color: black;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.chess-board {
+  width: 250px;
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+}
+
+.form {
+  text-align: center;
+  margin-top: 100px;
+}
+
+.game-over {
+  position: fixed;
+  right: 50px;
+  bottom: 300px;
+}
+
+.modal {
+  display: block;
+  z-index: 1;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #cce0ff;
+  text-align: center;
+  padding-top: 100px;
+}
+
+.chat {
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
+  width: 250px;
+  height: 250px;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.messages {
+  width: 90%;
+  height: 85%;
+  overflow-y: scroll;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding-left: 25px;
+  font-size: 15px;
+}
+
+.message {
+  padding-right: 25px;
+}
+
+.input-message {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 96.7%; /* wtf */
+}
+
+.log {
+  color: gray;
+  font-size: 80%;
+  margin-left: -20px;
+  margin-top:  10px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-style: italic;
+}
+
+.username {
+  margin-right: 10px;
+}
