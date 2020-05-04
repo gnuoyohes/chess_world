@@ -9,11 +9,13 @@ import secrets
 # import json
 import os
 
-SOCKET_URL = os.environ.get('SOCKET_URL')
-if not SOCKET_URL:
-    SOCKET_URL = "http://localhost:5000"
-else:
-    print("Socket URL: " + SOCKET_URL)
+SOCKET_URL = "http://localhost:5000"
+BASE_URL = os.environ.get('BASE_URL')
+PORT = os.environ.get('PORT')
+if BASE_URL is not None and PORT is not None:
+    SOCKET_URL = "{}:{}".format(BASE_URL, PORT)
+
+print("Socket URL: " + SOCKET_URL)
 
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes(32) # used to cryptographically sign session cookies
