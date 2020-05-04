@@ -6,7 +6,14 @@ from flask import Flask, render_template, request, session
 from flask_socketio  import SocketIO, emit, join_room, close_room
 import uuid
 import secrets
-import json
+# import json
+import os
+
+SOCKET_URL = os.environ.get('SOCKET_URL')
+if not SOCKET_URL:
+    SOCKET_URL = "http://localhost:5000"
+else:
+    print("Socket URL: " + SOCKET_URL)
 
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes(32) # used to cryptographically sign session cookies
@@ -39,7 +46,7 @@ def index():
 @app.route('/<room_key>')
 def game(room_key):
     if room_key in rooms:
-        return render_template('game.html', room_key=room_key)
+        return render_template('game.html', room_key=room_key, socket_url=SOCKET_URL)
     else:
         return 'Game does not exist', 404
 

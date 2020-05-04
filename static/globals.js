@@ -1,6 +1,7 @@
 var ROOMKEY = document.getElementById("globals").getAttribute("room-key");
 var NAME = '';
-const SOCKET = io();
+var SOCKETURL = document.getElementById("globals").getAttribute("socket-url");
+const SOCKET = io(SOCKETURL);
 
 // Prevents input from having injected markup
 const CLEANINPUT = (input) => {
