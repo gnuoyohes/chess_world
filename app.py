@@ -9,11 +9,9 @@ import secrets
 # import json
 import os
 
-SOCKET_URL = "http://localhost:5000"
-BASE_URL = os.environ.get('BASE_URL')
-PORT = os.environ.get('PORT')
-if BASE_URL is not None and PORT is not None:
-    SOCKET_URL = "{}:{}".format(BASE_URL, PORT)
+SOCKET_URL = os.environ.get('SOCKET_URL')
+if SOCKET_URL is None:
+    SOCKET_URL = "http://localhost:5000"
 
 print("Socket URL: " + SOCKET_URL)
 
