@@ -3,6 +3,7 @@
 # backend flask-socketio server for chess world
 
 from flask import Flask, render_template, request, session
+from flask_cors import CORS
 from flask_socketio  import SocketIO, emit, join_room, close_room
 import uuid
 import secrets
@@ -16,10 +17,10 @@ if SOCKET_URL is None:
 print("Socket URL: " + SOCKET_URL)
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = secrets.token_bytes(32) # used to cryptographically sign session cookies
 
-# socket = SocketIO(app, cors_allowed_origins="*")
-socket = SocketIO(app)
+socket = SocketIO(app, cors_allowed_origins="*")
 
 # Single entry in rooms:
 #
@@ -63,6 +64,13 @@ def get_room():
 
 @app.route('/create_room', methods=['POST'])
 def create_room():
+    # delete any rooms with no users
+    for key in list(State.rooms.keys()):
+        if State.rooms[key]['info']['num_users'] == 0:
+            del State.rooms[key]
+            print('Room {} closed!'.format(key))
+
+    # create new room
     room_key = uuid.uuid1().hex[:6].upper()
     session['room_key'] = room_key
     State.rooms[room_key] = { 'board': '', 'users': {}, 'info': { 'white': '', 'black': '', 'num_users': 0 } }

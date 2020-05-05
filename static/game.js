@@ -51,7 +51,6 @@ var handler = function ( down ) {
 	return function ( e ) {
 		if (e.metaKey) return;
 		var key = e.which || e.keyCode || 0;
-		console.log(key);
 		var index = watchedKeyCodes.indexOf( key );
 		if ( e.shiftKey )
 			motion.sprinting = true;
