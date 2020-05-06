@@ -1,11 +1,12 @@
 # CHESS WORLD
-## Seho Young, Hanson Kang
 
 ---
 
 Built on [three.js](https://threejs.org/), [Flask](https://flask.palletsprojects.com/en/1.1.x/), and [Socket.IO](https://socket.io/)
 
 Uses [chess.js](https://github.com/jhlywa/chess.js) and [chessboard.js](https://chessboardjs.com/index.html)
+
+Huge shoutout to [hinger](https://sketchfab.com/hinger) for the amazing world design, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
 ### Install dependencies:
 - `pip3 install -r requirements.txt`

@@ -4,11 +4,12 @@ var platform;
 var moon;
 var userObjs = {};
 
-const texture_folder = "/static/textures";
+const textures_folder = "/static/textures/";
+const models_folder = "/static/models/";
 
 
 function addGround(scene) {
-  var groundTexture = new THREE.TextureLoader().load(texture_folder + "/terrain/grasslight-big.jpg");
+  var groundTexture = new THREE.TextureLoader().load(textures_folder + "terrain/grasslight-big.jpg");
   groundTexture.wrapS = THREE.RepeatWrapping;
   groundTexture.wrapT = THREE.RepeatWrapping;
   groundTexture.repeat.set(25, 25);
@@ -25,13 +26,27 @@ function addGround(scene) {
   platform = ground;
 }
 
+// https://sketchfab.com/3d-models/hera-1ba36839519041a0b66e246e36263493
+function addWorldFBX(scene) {
+  var loader = new THREE.FBXLoader();
+
+  loader.load(models_folder + 'Hera_Island_Test.fbx', function ( object ) {
+    object.scale.set(0.03, 0.03, 0.03);
+    object.position.set(0, -30, 0);
+  	scene.add(object);
+    platform = object;
+  }, undefined, function ( error ) {
+  	console.error(error);
+  } );
+}
+
 // borrowed from https://github.com/CoryG89/MoonDemo
 function addMoon(scene) {
   var radius = 80;
   var xSegments = 50;
   var ySegments = 50;
   var geo = new THREE.SphereGeometry(radius, xSegments, ySegments);
-  var moonTexture = new THREE.TextureLoader().load(texture_folder + "/moon/moon.jpg");
+  var moonTexture = new THREE.TextureLoader().load(textures_folder + "moon/moon.jpg");
   var mat = new THREE.MeshBasicMaterial({map: moonTexture})
   var mesh = new THREE.Mesh(geo, mat);
   mesh.position.set(-1000, 500, -1000);
@@ -43,12 +58,12 @@ function addMoon(scene) {
 // borrowed from https://github.com/CoryG89/MoonDemo
 function addSky(scene) {
   var envMap = new THREE.CubeTextureLoader().load( [
-			texture_folder + '/starfield/right.png', // right
-			texture_folder + '/starfield/left.png', // left
-			texture_folder + '/starfield/top.png', // top
-			texture_folder + '/starfield/bottom.png', // bottom
-			texture_folder + '/starfield/back.png', // back
-			texture_folder + '/starfield/front.png' // front
+			textures_folder + 'starfield/right.png', // right
+			textures_folder + 'starfield/left.png', // left
+			textures_folder + 'starfield/top.png', // top
+			textures_folder + 'starfield/bottom.png', // bottom
+			textures_folder + 'starfield/back.png', // back
+			textures_folder + 'starfield/front.png' // front
 		] );
 	scene.background = envMap;
 }
@@ -72,7 +87,8 @@ function getScene() {
   var scene = new THREE.Scene();
   // addSky(scene);
   // addMoon(scene);
-  addGround(scene);
+  // addGround(scene);
+  addWorldFBX(scene);
 
   scene.background = new THREE.Color( 0xcce0ff );
   scene.fog = new THREE.FogExp2( 0xcce0ff, 0.01 );
