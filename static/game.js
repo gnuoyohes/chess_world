@@ -7,11 +7,11 @@ var scene;
 // init 3D stuff
 var renderer = new THREE.WebGLRenderer( { antialias: true } );
 renderer.setPixelRatio( window.devicePixelRatio );
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+// renderer.shadowMap.enabled = true;
+// renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild( renderer.domElement );
 var camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 10000 );
-
+var cameraYOffset = 5;
 
 var motion = {
 	sprinting: false,
@@ -21,12 +21,14 @@ var motion = {
   velocity: new THREE.Vector3(),
 	rotation: new THREE.Vector2(),
 	spinning: new THREE.Vector2(),
+	quaternion: new THREE.Quaternion()
 };
 
+const mapXLength = 300, mapZLength = 300, yHeight = 5;
 
 var resetGame = function () {
 	scene = getScene();
-	motion.position.set(0, 0, 0);
+	motion.position.set(Math.random()*mapXLength-mapXLength/2, yHeight, Math.random()*mapZLength-mapZLength/2);
 	motion.rotation.set(0, 0, 0);
 	motion.spinning.set(0, 0, 0);
 };
@@ -34,8 +36,10 @@ var resetGame = function () {
 // game systems code
 var resetPlayer = function () {
 	if ( motion.position.y < -50 ) {
-		motion.position.set( 0, 0, 0 );
+		motion.position.set(Math.random()*mapXLength-mapXLength/2, yHeight, Math.random()*mapZLength-mapZLength/2);
 		motion.velocity.multiplyScalar( 0 );
+		motion.rotation.multiplyScalar( 0 );
+		motion.spinning.multiplyScalar( 0 );
 	}
 };
 
@@ -129,54 +133,63 @@ var keyboardControls = function () {
 };
 
 var applyPhysics = function () {
-	var birdsEye = 100;
-	var kneeDeep = 0.4;
-	var raycaster = new THREE.Raycaster();
-	raycaster.ray.direction.set( 0, - 1, 0 );
-	var angles = new THREE.Vector2();
-	var displacement = new THREE.Vector3();
 	if ( platform ) {
+		const time = 1,
+					damping = 0.8,
+					gravity = 0.03,
+					tau = 2 * Math.PI,
+					birdsEye = 100,
+					kneeDeep = 1.7;
 
-		raycaster.ray.origin.copy( motion.position );
-		raycaster.ray.origin.y += birdsEye;
-		var hits = [];
-		// hits = raycaster.intersectObject(platform); // for ground
-		hits = raycaster.intersectObjects(platform.children); // for world
-		const time = 1, damping = 0.8, gravity = 0.03, tau = 2 * Math.PI;
+		var rayDown = new THREE.Raycaster();
+		rayDown.ray.direction.set( 0, - 1, 0 );
+		rayDown.ray.origin.copy( motion.position );
+		rayDown.ray.origin.y += birdsEye;
+		var hitsDown = rayDown.intersectObject(platform);
 
+		var euler = new THREE.Euler( motion.rotation.x, motion.rotation.y, 0, 'YXZ' );
+		motion.quaternion.setFromEuler( euler );
+
+		// var forwardDirection = new THREE.Vector3();
+		// forwardDirection.copy(motion.velocity).applyQuaternion(motion.quaternion).normalize();
+		// var rayForward = new THREE.Raycaster();
+		// rayForward.ray.direction.copy(forwardDirection);
+		// rayForward.ray.origin.copy(motion.position);
+		// rayForward.ray.origin.y += cameraYOffset;
+		// var hitsForward = rayForward.intersectObjects(world);
+
+		var angles = new THREE.Vector2();
+		var displacement = new THREE.Vector3();
 		motion.airborne = true;
 		// are we above, or at most knee deep in, the platform?
-		if ( ( hits.length > 0 ) ) {
-			var actualHeight = hits[ 0 ].distance - birdsEye;
+		if ( ( hitsDown.length > 0 ) ) {
+			var actualHeight = hitsDown[ 0 ].distance - birdsEye;
 			// collision: stick to the surface if landing on it
 			if ( ( motion.velocity.y <= 0 ) && ( Math.abs( actualHeight ) < kneeDeep ) ) {
 				motion.position.y -= actualHeight;
 				motion.velocity.y = 0;
 				motion.airborne = false;
 			}
-			if ( motion.airborne ) motion.velocity.y -= gravity;
-			angles.copy( motion.spinning ).multiplyScalar( time );
-			if ( ! motion.airborne ) motion.spinning.multiplyScalar( damping );
-			displacement.copy( motion.velocity ).multiplyScalar( time );
-			if ( ! motion.airborne ) motion.velocity.multiplyScalar( damping );
-			motion.rotation.add( angles );
-			motion.position.add( displacement );
-			// limit the tilt at ±0.4 radians
-			motion.rotation.x = Math.max( - 0.6, Math.min( + 0.6, motion.rotation.x ) );
-			// wrap horizontal rotation to 0...2π
-			motion.rotation.y += tau;
-			motion.rotation.y %= tau;
 		}
+		if ( motion.airborne ) motion.velocity.y -= gravity;
+		angles.copy( motion.spinning ).multiplyScalar( time );
+		if ( ! motion.airborne ) motion.spinning.multiplyScalar( damping );
+		displacement.copy( motion.velocity ).multiplyScalar( time );
+		if ( ! motion.airborne ) motion.velocity.multiplyScalar( damping );
+		motion.rotation.add( angles );
+		motion.position.add( displacement );
+		// limit the tilt at ±0.4 radians
+		motion.rotation.x = Math.max( - 0.6, Math.min( + 0.6, motion.rotation.x ) );
+		// wrap horizontal rotation to 0...2π
+		motion.rotation.y += tau;
+		motion.rotation.y %= tau;
 	}
 };
 
 var updateCamera = function () {
-	var euler = new THREE.Euler( 0, 0, 0, 'YXZ' );
-	euler.x = motion.rotation.x;
-	euler.y = motion.rotation.y;
-	camera.quaternion.setFromEuler( euler );
+	camera.quaternion.copy( motion.quaternion );
 	camera.position.copy( motion.position );
-	camera.position.y += 5;
+	camera.position.y += cameraYOffset;
 };
 
 var emitPosition = function () {
@@ -215,14 +228,13 @@ var start = function ( gameLoop, gameViewportSize ) {
 	};
 	render();
 };
-var gameLoop = function ( ) {
+var gameLoop = function () {
 	resetPlayer();
-	if (!typing) {
+	if (!typing)
 		keyboardControls(); // keyboard controls only when not typing in chat
-		applyPhysics();
-		updateCamera();
-		emitPosition();
-	}
+	applyPhysics();
+	updateCamera();
+	emitPosition();
 };
 var gameViewportSize = function () {
 	return {
@@ -242,6 +254,7 @@ function submitName() {
 	      if (this.responseText == "success") {
 					NAME = CLEANINPUT(name);
 	 		 		document.getElementById("myModal").style.display = "none";
+					document.getElementById("loading").style.display = "block";
 	 		 		document.getElementById("name").innerHTML = NAME;
 	 		 		SOCKET.emit('join_room', { name: NAME, roomKey: ROOMKEY });
 					SOCKET.emit('users_init', ROOMKEY);

@@ -1,6 +1,7 @@
 const MAPRADIUS = 200;
 
 var platform;
+var world;
 var moon;
 var userObjs = {};
 
@@ -29,13 +30,27 @@ function addGround(scene) {
 // https://sketchfab.com/3d-models/hera-1ba36839519041a0b66e246e36263493
 function addWorldFBX(scene) {
   var loader = new THREE.FBXLoader();
+  world = [];
 
-  loader.load(models_folder + 'Hera_Island_Test.fbx', function ( object ) {
+  loader.load(models_folder + 'hera.fbx', function ( object ) {
     object.scale.set(0.03, 0.03, 0.03);
     object.position.set(0, -30, 0);
-  	scene.add(object);
-    platform = object;
-  }, undefined, function ( error ) {
+
+    for (var child of object.children) {
+      if (child.name === "Plane")
+        platform = child;
+      else
+        world.push(child);
+    }
+
+    scene.add(object);
+    console.log(object);
+    console.log(platform);
+
+    document.getElementById("loading").style.display = "none";
+  }, function ( xhr ) { // called while object is loading
+    console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+  }, function ( error ) { // called on error
   	console.error(error);
   } );
 }
@@ -90,8 +105,12 @@ function getScene() {
   // addGround(scene);
   addWorldFBX(scene);
 
+  scene.onAfterRender = () =>  {
+
+  }
+
   scene.background = new THREE.Color( 0xcce0ff );
-  scene.fog = new THREE.FogExp2( 0xcce0ff, 0.01 );
+  scene.fog = new THREE.FogExp2( 0xcce0ff, 0.012 );
 
   // var moonlight = new THREE.DirectionalLight(0xe0d2c5, 0.07);
   // moonlight.position.set(-1000, 500, -1000); // Sun on the sky texture
