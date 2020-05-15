@@ -1,3 +1,5 @@
+var fadeSpeed = 400;
+
 function createRoom() {
   const world = $("#select-world").find(":selected").text();
 
@@ -23,7 +25,7 @@ function joinRoom() {
         window.location.href = document.URL + roomKey;
       }
       else {
-        $("#error-text").fadeIn(fadeInSpeed);
+        $("#error-text").fadeIn(fadeSpeed);
         $("#room-key").addClass("is-invalid");
       }
     }
@@ -31,8 +33,6 @@ function joinRoom() {
   xhttp.open("GET", `${document.URL}get_room?roomKey=${roomKey}`, true);
   xhttp.send();
 }
-
-var fadeSpeed = 400;
 
 // set up handlers
 $(document).ready(function () {
