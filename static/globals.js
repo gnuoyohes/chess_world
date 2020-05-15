@@ -1,5 +1,12 @@
 var ROOMKEY = document.getElementById("globals").getAttribute("room-key");
+var WORLD = document.getElementById("globals").getAttribute("world");
 var NAME = '';
+
+var MAPLENGTHX = 300;
+var MAPLENGTHZ = 300;
+var YHEIGHT = 5;
+var CAMERAYOFFSET = 5;
+
 var SOCKETURL = document.getElementById("globals").getAttribute("socket-url");
 const SOCKET = io(SOCKETURL);
 

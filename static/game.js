@@ -11,7 +11,6 @@ renderer.setPixelRatio( window.devicePixelRatio );
 // renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild( renderer.domElement );
 var camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 10000 );
-var cameraYOffset = 5;
 
 var motion = {
 	sprinting: false,
@@ -24,11 +23,9 @@ var motion = {
 	quaternion: new THREE.Quaternion()
 };
 
-const mapXLength = 300, mapZLength = 300, yHeight = 5;
-
 var resetGame = function () {
 	scene = getScene();
-	motion.position.set(Math.random()*mapXLength-mapXLength/2, yHeight, Math.random()*mapZLength-mapZLength/2);
+	motion.position.set(Math.random()*MAPLENGTHX-MAPLENGTHX/2, YHEIGHT, Math.random()*MAPLENGTHZ-MAPLENGTHZ/2);
 	motion.rotation.set(0, 0, 0);
 	motion.spinning.set(0, 0, 0);
 };
@@ -36,7 +33,7 @@ var resetGame = function () {
 // game systems code
 var resetPlayer = function () {
 	if ( motion.position.y < -50 ) {
-		motion.position.set(Math.random()*mapXLength-mapXLength/2, yHeight, Math.random()*mapZLength-mapZLength/2);
+		motion.position.set(Math.random()*MAPLENGTHX-MAPLENGTHX/2, YHEIGHT, Math.random()*MAPLENGTHZ-MAPLENGTHZ/2);
 		motion.velocity.multiplyScalar( 0 );
 		motion.rotation.multiplyScalar( 0 );
 		motion.spinning.multiplyScalar( 0 );
@@ -155,7 +152,7 @@ var applyPhysics = function () {
 		// var rayForward = new THREE.Raycaster();
 		// rayForward.ray.direction.copy(forwardDirection);
 		// rayForward.ray.origin.copy(motion.position);
-		// rayForward.ray.origin.y += cameraYOffset;
+		// rayForward.ray.origin.y += CAMERAYOFFSET;
 		// var hitsForward = rayForward.intersectObjects(world);
 
 		var angles = new THREE.Vector2();
@@ -189,7 +186,13 @@ var applyPhysics = function () {
 var updateCamera = function () {
 	camera.quaternion.copy( motion.quaternion );
 	camera.position.copy( motion.position );
-	camera.position.y += cameraYOffset;
+	camera.position.y += CAMERAYOFFSET;
+	if (flashlight) {
+		var direction = new THREE.Vector3();
+		camera.getWorldDirection(direction);
+		flashlight.position.copy(camera.position);
+		flashlight.target.position.addVectors(flashlight.position, direction);
+	}
 };
 
 var emitPosition = function () {
@@ -246,16 +249,16 @@ var gameViewportSize = function () {
 
 // called when submit button is clicked
 function submitName() {
-	const name = document.getElementById("nameInput").value;
+	const name = $("#name-input").val();
 	if (name !== '') {
 		var xhttp = new XMLHttpRequest();
 	  xhttp.onreadystatechange = function() {
 	    if (this.readyState == 4 && this.status == 200) {
 	      if (this.responseText == "success") {
 					NAME = CLEANINPUT(name);
-	 		 		document.getElementById("myModal").style.display = "none";
-					document.getElementById("loading").style.display = "block";
-	 		 		document.getElementById("name").innerHTML = NAME;
+	 		 		$("#name-page").hide();
+					$("#loading").show();
+	 		 		$("#name").html(NAME);
 	 		 		SOCKET.emit('join_room', { name: NAME, roomKey: ROOMKEY });
 					SOCKET.emit('users_init', ROOMKEY);
 
@@ -264,7 +267,7 @@ function submitName() {
 					start( gameLoop, gameViewportSize );
 	      }
 	      else {
-	        document.getElementById("error-text").innerHTML = "Name not valid";
+	        $("#error-text").fadeIn(400);
 	      }
 	    }
 	  };
@@ -275,7 +278,7 @@ function submitName() {
 
 // set up handler
 $(document).ready(function () {
-  $('#nameForm').submit(function (e) {
+  $('#name-form').submit(function (e) {
     e.preventDefault();
     submitName();
   });

@@ -1,0 +1,165 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #cce0ff;
+  height: 100%;
+  overflow: hidden;
+}
+
+#name-page {
+  display: block;
+  z-index: 1;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  padding-top: 100px;
+  background: white;
+}
+
+#name-form {
+  width: 200px;
+  margin: auto;
+  text-align: center;
+}
+
+#loading {
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    position: absolute;
+    top: 0;
+    left: 0;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    padding-top: 10%;
+    display: none;
+    background: white;
+}
+
+.lds-dual-ring {
+  display: inline-block;
+  width: 200px;
+  height: 200px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 200px;
+  height: 200px;
+  margin: 1px;
+  border-radius: 50%;
+  border: 10px solid black;
+  border-color: black transparent black transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+ul {
+  list-style: none;
+  word-wrap: break-word;
+}
+
+li {
+  margin-bottom: 5px;
+}
+
+.btn {
+  transition-duration: 0.3s;
+  transition-property: background-color;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.btn:hover {
+  background-color: rgb(69, 69, 69); /* nice */
+  transition-duration: 0.3s;
+  transition-property: background-color;
+}
+
+.header {
+  padding: 15px;
+  margin-left: 20px;
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  color: black;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 90px;
+}
+
+#white {
+  font-weight: 1000;
+}
+
+#black {
+  font-weight: 1000;
+}
+
+.chess-board {
+  width: 250px;
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+}
+
+.game-over {
+  position: fixed;
+  right: 50px;
+  bottom: 300px;
+}
+
+.chat {
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
+  width: 250px;
+  height: 250px;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.messages {
+  width: 90%;
+  height: 85%;
+  overflow-y: scroll;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding-left: 25px;
+  font-size: 15px;
+}
+
+.message {
+  padding-right: 25px;
+}
+
+.input-message {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.log {
+  color: gray;
+  font-size: 80%;
+  margin-left: -20px;
+  margin-top:  10px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-style: italic;
+}
+
+.username {
+  margin-right: 10px;
+}

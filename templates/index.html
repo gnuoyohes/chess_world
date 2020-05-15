@@ -5,21 +5,67 @@
 		<title>Chess World</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link href="/static/css/style.css" type="text/css" rel="stylesheet"/>
+		<link href="/static/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
+		<link href="/static/css/index.css" type="text/css" rel="stylesheet"/>
 	</head>
 
 	<body>
+		<svg class="button logo" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="chess-rook" class="svg-inline--fa fa-chess-rook fa-w-12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+			<path d="M368 32h-56a16 16 0 0 0-16 16v48h-48V48a16 16 0 0 0-16-16h-80a16 16 0 0 0-16 16v48H88.1V48a16 16 0 0 0-16-16H16A16 16 0 0 0 0 48v176l64 32c0 48.33-1.54 95-13.21 160h282.42C321.54 351 320 303.72 320 256l64-32V48a16 16 0 0 0-16-16zM224 320h-64v-64a32 32 0 0 1 64 0zm144 128H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h352a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16z">
+			</path>
+		</svg>
+		<div class="modal" tabindex="-1" role="dialog" id="credits-modal">
+			<div class="modal-dialog" role="document">
+			  <div class="modal-content">
+			    <div class="modal-header">
+			      <h5 class="modal-title">CHESS WORLD</h5>
+			      <button type="button" class="button close" aria-label="Close" id="credits-modal-close">
+			        <span aria-hidden="true">&times;</span>
+			      </button>
+			    </div>
+			    <div class="modal-body">
+			      <p>Made with love (and sweat) by <a href="https://github.com/gnuoyohes" target="_blank">Seho Young</a>.</p>
+			    </div>
+			  </div>
+			</div>
+		</div>
+		<div class="modal" tabindex="-1" role="dialog" id="create-game-modal">
+			<div class="modal-dialog" role="document">
+			  <div class="modal-content">
+			    <div class="modal-header">
+			      <h5 class="modal-title">Create Game</h5>
+			      <button type="button" class="button close" aria-label="Close" id="create-game-modal-close">
+			        <span aria-hidden="true">&times;</span>
+			      </button>
+			    </div>
+			    <div class="modal-body">
+						<form class="form-group" id="create-game-form">
+				      <label for="select-world">World</label>
+				      <select class="form-control" id="select-world">
+				        <option>Camp</option>
+				        <option>Desert</option>
+				        <option>Forest</option>
+				        <option>Island</option>
+				        <option>Planet</option>
+								<option>Grass</option>
+				      </select>
+							<button type="submit" class="btn btn-primary">Go</button>
+				    </form>
+			    </div>
+			  </div>
+			</div>
+		</div>
+		<h1 class="title">
+			CHESS WORLD
+		</h1>
 		<div class="form">
-			<div>
-				<button id="create-room">Create Game</button><br><br><br>
-				<form id="join-game">
-				  Room key: <input type="text" id="roomKey"><br><br>
-				  <input type="submit" value="Join Game">
-				</form>
-			</div>
-			<div>
-				<p id="error-text"></p>
-			</div>
+			<button id="create-game" class="btn btn-primary">Create Game</button>
+			<form class="form-group has-danger" id="join-game">
+			  <label class="form-control-label" for="room-key">Room Key</label>
+			  <input type="text" class="form-control" id="room-key">
+			  <div class="invalid-feedback" id="error-text">Room not found</div>
+				<button type="submit" class="btn btn-primary">Join Game</button>
+			</form>
 		</div>
 
 		<script src="/static/lib/jquery.min.js"></script>

@@ -1,4 +1,5 @@
 function createRoom() {
+  const world = $("#select-world").find(":selected").text();
 
   var xhttp = new XMLHttpRequest();
 
@@ -8,12 +9,12 @@ function createRoom() {
       window.location.href = document.URL + roomKey;
     }
   };
-  xhttp.open("POST", `${document.URL}create_room`, true);
+  xhttp.open("POST", `${document.URL}create_room?world=${world}`, true);
   xhttp.send();
 }
 
 function joinRoom() {
-  const roomKey = document.getElementById("roomKey").value;
+  const roomKey = $("#room-key").val();
 
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -22,7 +23,8 @@ function joinRoom() {
         window.location.href = document.URL + roomKey;
       }
       else {
-        document.getElementById("error-text").innerHTML = "Room not found";
+        $("#error-text").fadeIn(fadeInSpeed);
+        $("#room-key").addClass("is-invalid");
       }
     }
   };
@@ -30,13 +32,31 @@ function joinRoom() {
   xhttp.send();
 }
 
+var fadeSpeed = 400;
+
 // set up handlers
 $(document).ready(function () {
   $('#join-game').submit(function (e) {
     e.preventDefault();
     joinRoom();
   });
-  $('#create-room').click(function (e) {
+  $('#create-game').click(function (e) {
+    $("#create-game-modal").fadeIn(fadeSpeed);
+  });
+  $('#create-game-modal-close').click(function (e) {
+    $("#create-game-modal").fadeOut(fadeSpeed);
+  });
+  $('#create-game-form').submit(function (e) {
+    e.preventDefault();
     createRoom();
+  });
+  $('.logo').click(function (e) {
+    $("#credits-modal").fadeIn(fadeSpeed);
+  });
+  $('#credits-modal').click(function (e) {
+    $("#credits-modal").fadeOut(fadeSpeed);
+  });
+  $('#credits-modal-close').click(function (e) {
+    $("#credits-modal").fadeOut(fadeSpeed);
   });
 });

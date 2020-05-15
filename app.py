@@ -5,6 +5,7 @@
 from flask import Flask, render_template, request, session
 from flask_cors import CORS
 from flask_socketio  import SocketIO, emit, join_room, close_room
+import chess
 import uuid
 import secrets
 # import json
@@ -25,7 +26,8 @@ socket = SocketIO(app, cors_allowed_origins="*")
 # Single entry in rooms:
 #
 # <room key> : {
-#   'board': <chess board FEN>,
+#   'world': <name of world>,
+#   'board': <chess.Board>,
 #   'users': {
 #       <name>: <position ([x, y, z])>,
 #       ...
@@ -50,7 +52,8 @@ def index():
 def game(room_key):
     if room_key in State.rooms:
         session['room_key'] = room_key
-        return render_template('game.html', room_key=room_key, socket_url=SOCKET_URL)
+        world = State.rooms[room_key]['world']
+        return render_template('game.html', room_key=room_key, world=world, socket_url=SOCKET_URL)
     else:
         return 'Game does not exist', 404
 
@@ -64,6 +67,8 @@ def get_room():
 
 @app.route('/create_room', methods=['POST'])
 def create_room():
+    world = request.values.get("world")
+
     # delete any rooms with no users
     for key in list(State.rooms.keys()):
         if State.rooms[key]['info']['num_users'] == 0:
@@ -73,7 +78,7 @@ def create_room():
     # create new room
     room_key = uuid.uuid1().hex[:6].upper()
     session['room_key'] = room_key
-    State.rooms[room_key] = { 'board': '', 'users': {}, 'info': { 'white': '', 'black': '', 'num_users': 0 } }
+    State.rooms[room_key] = { 'world': world, 'board': chess.Board(), 'users': {}, 'info': { 'white': '', 'black': '', 'num_users': 0 } }
     print('Room {} added!'.format(room_key))
     return room_key
 
@@ -93,13 +98,18 @@ def game_not_found(error):
 
 # sent everytime board updates
 def send_board(room_key):
-    board_fen = State.rooms[room_key]['board']
+    board_fen = State.rooms[room_key]['board'].fen()
     emit('board', board_fen, room=room_key)
+
+def send_draw(room_key):
+    if (State.rooms[room_key]['board'].can_claim_draw()):
+        emit('draw', room=room_key)
 
 # sent once when page loads
 def send_info(room_key):
     emit('info', State.rooms[room_key]['info'], room=room_key)
 
+# sent everytime a user moves
 def send_users(room_key):
     emit('users', State.rooms[room_key]['users'], room=room_key)
 
@@ -122,6 +132,7 @@ def on_join(data):
 
     send_info(room_key)
     send_board(room_key)
+    send_draw(room_key)
     emit('user_joined', {'username': name, 'numUsers': info['num_users']}, room=room_key)
 
 # user automatically leaves room when disconnecting
@@ -158,8 +169,10 @@ def on_disconnect():
 @socket.on('update_board')
 def on_update_board(data):
     room_key = data['roomKey']
-    State.rooms[room_key]['board'] = data['board']
+    move = chess.Move.from_uci(data['move'])
+    State.rooms[room_key]['board'].push(move)
     send_board(room_key)
+    send_draw(room_key)
 
 @socket.on('users_init')
 def on_users_init(room_key):

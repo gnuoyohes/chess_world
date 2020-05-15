@@ -8,6 +8,8 @@ var blackSquareGrey = '#696969';
 var isWhite = false;
 var isBlack = false;
 var updated = false;
+var recentMove = '';
+var gameOver = false;
 
 function removeGreySquares () {
   $('#myBoard .square-55d63').css('background', '');
@@ -26,7 +28,7 @@ function greySquare (square) {
 
 function onDragStart (source, piece) {
   // do not pick up pieces if the game is over
-  if (chessGame.game_over()) return false;
+  if (gameOver) return false;
 
   if (isWhite) {
     if (chessGame.turn() === 'b' || piece.search(/^b/) !== -1) return false;
@@ -56,10 +58,13 @@ function onDrop (source, target) {
   }
   else {
     updated = true;
+    recentMove = `${source}${target}`
   }
 }
 
 function onMouseoverSquare (square, piece) {
+  if (gameOver) return;
+
   if (isWhite) {
     if (chessGame.turn() === 'b' || (piece && piece.search(/^b/) !== -1)) return;
   }
@@ -94,7 +99,7 @@ function onMouseoutSquare (square, piece) {
 
 function onSnapEnd () {
   if (updated) {
-    SOCKET.emit('update_board', { roomKey: ROOMKEY, board: chessGame.fen() });
+    SOCKET.emit('update_board', { roomKey: ROOMKEY, move: recentMove });
     updated = false;
   }
   else return false;
@@ -123,8 +128,8 @@ SOCKET.on('info', info => {
   else {
     isWhite = isBlack = false;
   }
-  document.getElementById("white").innerHTML = info.white;
-  document.getElementById("black").innerHTML = info.black;
+  $("#white").html(info.white);
+  $("#black").html(info.black);
 
   if (isBlack) chessBoard.orientation('black');
   else chessBoard.orientation('white');
@@ -134,10 +139,17 @@ SOCKET.on('board', board => {
   chessBoard.position(board);
   chessGame.load(board)
   if (chessGame.in_checkmate()) {
+    gameOver = true;
     const winner = chessGame.turn() === 'w' ? 'black' : 'white';
-    document.getElementById("gameOver").innerHTML = `Game over: ${winner} wins`;
+    $("#gameOver").html(`Game over: ${winner} wins`);
   }
   else if (chessGame.in_draw()) {
-    document.getElementById("gameOver").innerHTML = "Game over: draw";
+    gameOver = true;
+    $("#gameOver").html("Game over: draw");
   }
+});
+
+SOCKET.on('draw', () => {
+  gameOver = true;
+  $("#gameOver").html("Game over: draw");
 });

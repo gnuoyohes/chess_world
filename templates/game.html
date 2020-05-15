@@ -5,26 +5,26 @@
 		<title>Chess World</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link href="/static/css/style.css" type="text/css" rel="stylesheet">
+		<link href="/static/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 		<link href="/static/css/chessboard.min.css" type="text/css" rel="stylesheet">
+		<link href="/static/css/game.css" type="text/css" rel="stylesheet">
 	</head>
 
 	<body>
-		<div id="myModal" class="modal">
-			<form id="nameForm">
-				Name: <input id="nameInput" type="text" maxlength="20"><br><br>
-				<input type="submit" value="Submit">
+		<div id="name-page">
+			<form class="form-group has-danger" id="name-form">
+			  <label class="form-control-label" for="name-input">Name</label>
+			  <input type="text" class="form-control" id="name-input">
+			  <div class="invalid-feedback" id="error-text">Name not valid</div>
+				<button type="submit" class="btn btn-primary">Submit</button>
 			</form>
-			<div>
-				<p id="error-text"></p>
-			</div>
 		</div>
 		<div id="loading">
 			<div class="lds-dual-ring"></div>
 		</div>
 		<div class="header">
 			<p>Room: {{ room_key }} Name: <span id='name'></span></p>
-			<p>White: <b id='white'></b> Black: <b id='black'></b></p>
+			<p>White: <span id='white'></span> Black: <span id='black'></span></p>
 		</div>
 		<div id="myBoard" class="chess-board"></div>
 		<p id="gameOver" class="game-over"></p>
@@ -73,7 +73,7 @@
 			}
 		</script>
 
-		<script id="globals" src="/static/globals.js" room-key="{{ room_key }}" socket-url="{{ socket_url }}"></script>
+		<script id="globals" src="/static/globals.js" room-key="{{ room_key }}" world="{{ world }}" socket-url="{{ socket_url }}"></script>
 		<script src="/static/scene.js"></script>
 		<script src="/static/sounds.js"></script>
 		<script src="/static/chessBoard.js"></script>

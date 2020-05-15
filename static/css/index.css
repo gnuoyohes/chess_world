@@ -1,0 +1,64 @@
+h1 {
+  text-align: center;
+  font-size: 80px;
+  font-weight: 1000;
+  padding-top: 80px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.close {
+  outline: none;
+}
+
+.btn {
+  transition-duration: 0.3s;
+  transition-property: background-color;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.btn:hover {
+  background-color: rgb(69, 69, 69); /* nice */
+  transition-duration: 0.3s;
+  transition-property: background-color;
+}
+
+.logo {
+  position: absolute;
+  left: 60px;
+  top: 60px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+}
+
+.logo:hover {
+  fill: rgb(69, 69, 69); /* nice */
+  transition-duration: 0.3s;
+  transition-property: fill;
+}
+
+.form {
+  text-align: center;
+  margin: auto;
+  margin-top: 60px;
+  width: 20%;
+}
+
+#join-game {
+  margin-top: 40px;
+}
+
+.modal {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  top: 100px;
+  border-radius: 10px;
+}
