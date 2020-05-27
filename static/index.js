@@ -40,7 +40,7 @@ $(document).ready(function () {
     e.preventDefault();
     joinRoom();
   });
-  $('#create-game').click(function (e) {
+  $('#create-game-button').click(function (e) {
     $("#create-game-modal").fadeIn(fadeSpeed);
   });
   $('#create-game-modal-close').click(function (e) {
@@ -52,9 +52,6 @@ $(document).ready(function () {
   });
   $('.logo').click(function (e) {
     $("#credits-modal").fadeIn(fadeSpeed);
-  });
-  $('#credits-modal').click(function (e) {
-    $("#credits-modal").fadeOut(fadeSpeed);
   });
   $('#credits-modal-close').click(function (e) {
     $("#credits-modal").fadeOut(fadeSpeed);

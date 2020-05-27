@@ -14,17 +14,17 @@
 			<path d="M368 32h-56a16 16 0 0 0-16 16v48h-48V48a16 16 0 0 0-16-16h-80a16 16 0 0 0-16 16v48H88.1V48a16 16 0 0 0-16-16H16A16 16 0 0 0 0 48v176l64 32c0 48.33-1.54 95-13.21 160h282.42C321.54 351 320 303.72 320 256l64-32V48a16 16 0 0 0-16-16zM224 320h-64v-64a32 32 0 0 1 64 0zm144 128H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h352a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16z">
 			</path>
 		</svg>
-		<div class="modal" tabindex="-1" role="dialog" id="credits-modal">
+		<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="credits-modal">
 			<div class="modal-dialog" role="document">
 			  <div class="modal-content">
 			    <div class="modal-header">
 			      <h5 class="modal-title">CHESS WORLD</h5>
-			      <button type="button" class="button close" aria-label="Close" id="credits-modal-close">
+			      <button type="button" class="button close" aria-label="Close" data-dismiss="modal" id="credits-modal-close">
 			        <span aria-hidden="true">&times;</span>
 			      </button>
 			    </div>
 			    <div class="modal-body">
-			      <p>Made with love (and sweat) by <a href="https://github.com/gnuoyohes" target="_blank">Seho Young</a>.</p>
+			      <p>Made with &#10084; (and &#128166;) by <a href="https://github.com/gnuoyohes" target="_blank">Seho Young</a>.</p>
 			    </div>
 			  </div>
 			</div>
@@ -34,7 +34,7 @@
 			  <div class="modal-content">
 			    <div class="modal-header">
 			      <h5 class="modal-title">Create Game</h5>
-			      <button type="button" class="button close" aria-label="Close" id="create-game-modal-close">
+			      <button type="button" class="button close" aria-label="Close" data-dismiss="modal" id="create-game-modal-close">
 			        <span aria-hidden="true">&times;</span>
 			      </button>
 			    </div>
@@ -59,7 +59,7 @@
 			CHESS WORLD
 		</h1>
 		<div class="form">
-			<button id="create-game" class="btn btn-primary">Create Game</button>
+			<button class="btn btn-primary" type="button" data-toggle="modal" data-target="#create-game-modal" id="create-game-button">Create Game</button>
 			<form class="form-group has-danger" id="join-game">
 			  <label class="form-control-label" for="room-key">Room Key</label>
 			  <input type="text" class="form-control" id="room-key">

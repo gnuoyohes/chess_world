@@ -1,4 +1,4 @@
-// Three.js stuff
+//////// three.js stuff ////////
 
 if (!Detector.webgl) Detector.addGetWebGLMessage();
 

@@ -24,6 +24,22 @@ html, body {
   text-align: center;
 }
 
+.instructions {
+  width: 500px;
+  margin: auto;
+  margin-top: 100px;
+  text-align: center;
+  padding-left: 30px;
+}
+.instructions span {
+  display: inline-block;
+  width: 200px;
+  text-align: left;
+}
+.instructions span:first-of-type {
+  text-align: right;
+}
+
 #loading {
     width: 100%;
     height: 100%;
@@ -89,7 +105,7 @@ li {
   padding: 15px;
   margin-left: 20px;
   margin-top: 20px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 20px;
   color: black;
   position: fixed;
@@ -114,9 +130,15 @@ li {
 }
 
 .game-over {
+  padding: 15px;
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  color: black;
+  height: 45px;
   position: fixed;
-  right: 50px;
-  bottom: 300px;
+  right: 33px;
+  bottom: 270px;
 }
 
 .chat {
