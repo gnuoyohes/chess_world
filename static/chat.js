@@ -2,9 +2,6 @@
 
 var typing = false;
 
-var FADE_TIME = 150; // ms
-var TYPING_TIMER_LENGTH = 400; // ms
-
 // Initialize variables
 var $window = $(window);
 var $messages = $('.messages'); // Messages area

@@ -101,11 +101,12 @@ def send_board(room_key):
     board_fen = State.rooms[room_key]['board'].fen()
     emit('board', board_fen, room=room_key)
 
+# sent when game is drawn (3 fold repetition, 50 move rule)
 def send_draw(room_key):
     if (State.rooms[room_key]['board'].can_claim_draw()):
         emit('draw', room=room_key)
 
-# sent once when page loads
+# sent once when page loads, and everytime a user joins room
 def send_info(room_key):
     emit('info', State.rooms[room_key]['info'], room=room_key)
 
@@ -131,7 +132,12 @@ def on_join(data):
         info['black'] = name
 
     send_info(room_key)
-    send_board(room_key)
+
+    # send board only to user who joined
+    client = request.sid
+    board_fen = State.rooms[room_key]['board'].fen()
+    emit('init_board', board_fen, room=client)
+
     send_draw(room_key)
     emit('user_joined', {'username': name, 'numUsers': info['num_users']}, room=room_key)
 
@@ -171,6 +177,9 @@ def on_update_board(data):
     room_key = data['roomKey']
     move = chess.Move.from_uci(data['move'])
     State.rooms[room_key]['board'].push(move)
+    # send move (to move 3D piece)
+    emit('move', data['move'], room=room_key)
+    
     send_board(room_key)
     send_draw(room_key)
 

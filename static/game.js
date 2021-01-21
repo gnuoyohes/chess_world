@@ -2,8 +2,6 @@
 
 if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-var scene;
-
 // init 3D stuff
 var renderer = new THREE.WebGLRenderer( { antialias: true } );
 renderer.setPixelRatio( window.devicePixelRatio );
@@ -24,7 +22,7 @@ var motion = {
 };
 
 var resetGame = function () {
-	scene = getScene();
+	initScene();
 	motion.position.set(Math.random()*MAPLENGTHX-MAPLENGTHX/2, YHEIGHT, Math.random()*MAPLENGTHZ-MAPLENGTHZ/2);
 	motion.rotation.set(0, 0, 0);
 	motion.spinning.set(0, 0, 0);
@@ -197,12 +195,33 @@ var updateCamera = function () {
 
 var emitPosition = function () {
 	if (!motion.prev_position.equals(motion.position)) {
+		// console.log(motion.position);
 		SOCKET.emit('update_position', {
 			name: NAME,
 			roomKey: ROOMKEY,
 			position: [motion.position.x, motion.position.y + 2, motion.position.z]
 		});
 		motion.prev_position.copy(motion.position);
+	}
+};
+
+var movePieces = function () {
+	if (movingPieces.length > 0) {
+		for (i=movingPieces.length-1; i>=0; i--) {
+			o = movingPieces[i];
+			if (o.iterations < 1) {
+				o.object.position.copy(o.finalPos);
+				movingPieces.splice(i, 1);
+				capturedObj = o.captured;
+				if (capturedObj) {
+					removeObj(capturedObj);
+				}
+			}
+			else {
+				o.object.position.add(o.motion);
+				o.iterations--;
+			}
+		}
 	}
 };
 
@@ -223,11 +242,14 @@ var start = function ( gameLoop, gameViewportSize ) {
 	resize();
 	var lastTimeStamp;
 	var render = function ( timeStamp ) {
-		// var timeElapsed = lastTimeStamp ? timeStamp - lastTimeStamp : 0;
-		// lastTimeStamp = timeStamp;
-		gameLoop( );
+		gameLoop();
 		renderer.render( scene, camera );
-		requestAnimationFrame( render );
+		setTimeout(
+			function() {
+				requestAnimationFrame( render );
+			}, 1000 / FPS // 60 fps, approximate
+		);
+
 	};
 	render();
 };
@@ -238,6 +260,7 @@ var gameLoop = function () {
 	applyPhysics();
 	updateCamera();
 	emitPosition();
+	movePieces();
 };
 var gameViewportSize = function () {
 	return {
@@ -259,12 +282,13 @@ function submitName() {
 	 		 		$("#name-page").hide();
 					$("#loading").show();
 	 		 		$("#name").html(NAME);
-	 		 		SOCKET.emit('join_room', { name: NAME, roomKey: ROOMKEY });
-					SOCKET.emit('users_init', ROOMKEY);
 
 					// start Three.js
 					resetGame();
 					start( gameLoop, gameViewportSize );
+
+					SOCKET.emit('join_room', { name: NAME, roomKey: ROOMKEY });
+					SOCKET.emit('users_init', ROOMKEY);
 	      }
 	      else {
 	        $("#error-text").fadeIn(400);
@@ -290,7 +314,7 @@ SOCKET.on('users_init', users => {
 	for (var user in users) {
 		if (user !== NAME) {
 			console.log(user);
-			addUser(scene, user);
+			addUser(user);
 			const pos = users[user];
 			userObjs[user].position.set(pos[0], pos[1], pos[2]);
 		}
@@ -301,16 +325,18 @@ SOCKET.on('users', users => {
   for (var user in users) {
 		if (user !== NAME) {
 			const newPos = users[user];
-			userObjs[user].position.set(newPos[0], newPos[1], newPos[2]);
+			if (userObjs[user]) {
+				userObjs[user].position.set(newPos[0], newPos[1], newPos[2]);
+			}
 		}
 	}
 });
 
 SOCKET.on('user_joined', data => {
 	if (data['username'] !== NAME)
-		addUser(scene, data['username']);
+		addUser(data['username']);
 });
 
 SOCKET.on('user_left', data => {
-	removeUser(scene, data['username']);
+	removeUser(data['username']);
 });

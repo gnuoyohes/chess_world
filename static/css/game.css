@@ -151,18 +151,18 @@ li {
 }
 
 .messages {
-  width: 90%;
-  height: 85%;
+  width: 100%;
+  height: 90%;
   overflow-y: scroll;
   position: absolute;
   top: 0;
   left: 0;
-  padding-left: 25px;
+  padding-left: 20px;
   font-size: 15px;
 }
 
 .message {
-  padding-right: 25px;
+  padding-right: 20px;
 }
 
 .input-message {

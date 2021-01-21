@@ -1,15 +1,12 @@
-// NOTE: this example uses the chess.js library:
 // https://github.com/jhlywa/chess.js
 
 var chessBoard = null;
 var chessGame = new Chess();
-var whiteSquareGrey = '#a9a9a9';
-var blackSquareGrey = '#696969';
 var isWhite = false;
 var isBlack = false;
-var updated = false;
 var recentMove = '';
 var gameOver = false;
+
 
 function removeGreySquares () {
   $('#myBoard .square-55d63').css('background', '');
@@ -18,9 +15,9 @@ function removeGreySquares () {
 function greySquare (square) {
   var $square = $('#myBoard .square-' + square);
 
-  var background = whiteSquareGrey;
+  var background = WHITESQUAREGREY;
   if ($square.hasClass('black-3c85d')) {
-    background = blackSquareGrey;
+    background = BLACKSQUAREGREY;
   }
 
   $square.css('background', background);
@@ -48,17 +45,15 @@ function onDrop (source, target) {
   var move = chessGame.move({
     from: source,
     to: target,
-    promotion: 'q' // NOTE: always promote to a queen for example simplicity
+    promotion: 'q' // auto queen
   });
 
   // illegal move
   if (move === null) {
-    updated = false;
     return 'snapback';
   }
   else {
-    updated = true;
-    recentMove = `${source}${target}`
+    recentMove = `${source}${target}`;
   }
 }
 
@@ -98,11 +93,24 @@ function onMouseoutSquare (square, piece) {
 }
 
 function onSnapEnd () {
-  if (updated) {
+  console.log(recentMove);
+  if (recentMove !== '') {
     SOCKET.emit('update_board', { roomKey: ROOMKEY, move: recentMove });
-    updated = false;
+    recentMove = '';
   }
   else return false;
+}
+
+function checkForGameOver () {
+  if (chessGame.in_checkmate()) {
+    gameOver = true;
+    const winner = chessGame.turn() === 'w' ? 'black' : 'white';
+    $("#gameOver").html(`Game over: ${winner} wins`);
+  }
+  else if (chessGame.in_draw()) {
+    gameOver = true;
+    $("#gameOver").html("Game over: draw");
+  }
 }
 
 var config = {
@@ -116,6 +124,7 @@ var config = {
   onSnapEnd: onSnapEnd
 };
 chessBoard = Chessboard('myBoard', config);
+
 
 // socket handlers
 SOCKET.on('info', info => {
@@ -135,18 +144,26 @@ SOCKET.on('info', info => {
   else chessBoard.orientation('white');
 });
 
-SOCKET.on('board', board => {
-  chessBoard.position(board);
-  chessGame.load(board)
-  if (chessGame.in_checkmate()) {
-    gameOver = true;
-    const winner = chessGame.turn() === 'w' ? 'black' : 'white';
-    $("#gameOver").html(`Game over: ${winner} wins`);
-  }
-  else if (chessGame.in_draw()) {
-    gameOver = true;
-    $("#gameOver").html("Game over: draw");
-  }
+SOCKET.on('init_board', board_fen => {
+  console.log(board_fen);
+  chessBoard.position(board_fen);
+  chessGame.load(board_fen);
+  addChessboard(board_fen);
+  checkForGameOver();
+});
+
+SOCKET.on('board', board_fen => {
+  console.log(board_fen);
+  chessBoard.position(board_fen);
+  chessGame.load(board_fen);
+  checkForGameOver();
+});
+
+SOCKET.on('move', move => {
+  // move 3D piece
+  const source = move.substring(0, 2);
+  const target = move.substring(2, 4);
+  movePiece(source, target);
 });
 
 SOCKET.on('draw', () => {

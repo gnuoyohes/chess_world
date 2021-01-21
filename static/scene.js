@@ -1,14 +1,17 @@
 const MAPRADIUS = 200;
 
+var scene;
 var platform;
 var flashlight;
 var userObjs = {};
+var chessObjs = {};
+var movingPieces = [];
 
 const textures_folder = "/static/textures/";
 const models_folder = "/static/models/";
 
 
-function addGround(scene) {
+function addGround() {
   var groundTexture = new THREE.TextureLoader().load(textures_folder + "terrain/grasslight-big.jpg");
   groundTexture.wrapS = THREE.RepeatWrapping;
   groundTexture.wrapT = THREE.RepeatWrapping;
@@ -26,14 +29,14 @@ function addGround(scene) {
   platform = ground;
 
   scene.background = new THREE.Color( 0xcce0ff );
-  scene.fog = new THREE.FogExp2( 0xcce0ff, 0.012 );
+  scene.fog = new THREE.FogExp2( 0xcce0ff, 0.008 );
   var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
   scene.add( directionalLight );
 
   $("#loading").hide();
 }
 
-function addWorld(scene) {
+function addWorld() {
   var loader = new THREE.FBXLoader();
 
   switch (WORLD) {
@@ -97,7 +100,7 @@ function addWorld(scene) {
       break;
     case 'Forest':
       loader.load(models_folder + 'worlds/forest.fbx', function ( object ) {
-        object.scale.set(0.1, 0.1, 0.1);
+        object.scale.set(0.2, 0.2, 0.2);
         object.position.set(0, -30, 0);
 
         for (var child of object.children) {
@@ -123,8 +126,8 @@ function addWorld(scene) {
         var ambientLight = new THREE.AmbientLight(0xffffff, 0.001);
         scene.add( ambientLight );
 
-        MAPLENGTHX = 50;
-        MAPLENGTHZ = 50;
+        MAPLENGTHX = 100;
+        MAPLENGTHZ = 100;
 
         $("#loading").hide();
       }, function ( xhr ) { // called while object is loading
@@ -193,12 +196,184 @@ function addWorld(scene) {
       } );
       break;
     default:
-      addGround(scene);
+      addGround();
   }
   console.log(scene);
 }
 
-function addUser(scene, name) {
+function addChessboard(board_fen) {
+  const whiteMat = new THREE.MeshLambertMaterial( {
+    color: new THREE.Color(0xffffff),
+    emissive: new THREE.Color(0x696969)
+  } );
+  const blackMat = new THREE.MeshLambertMaterial( {
+    color: new THREE.Color(0x262626),
+    emissive: new THREE.Color(0x000000)
+  } );
+
+  switch (WORLD) {
+    case 'Camp':
+      BOARDOFFSET = new THREE.Vector3(-35, -16.1, 5);
+      BOARDSCALE = 1;
+      break;
+    case 'Desert':
+      BOARDOFFSET = new THREE.Vector3(-92, -34.4, -303.5);
+      BOARDSCALE = 1;
+      break;
+    case 'Forest':
+      BOARDOFFSET = new THREE.Vector3(6, -25.4, -2);
+      BOARDSCALE = 0.4;
+      break;
+    case 'Island':
+      BOARDOFFSET = new THREE.Vector3(283, -13.1, -49);
+      BOARDSCALE = 1;
+      break;
+    case 'Planet':
+      BOARDOFFSET = new THREE.Vector3(0, -1.9, 35);
+      BOARDSCALE = 2;
+      break;
+    case 'Grass':
+      BOARDOFFSET = new THREE.Vector3(0, 0.01, 0);
+      BOARDSCALE = 6;
+      break;
+    default:
+      BOARDOFFSET = new THREE.Vector3(0, 0, 0);
+  }
+  var loader = new THREE.FBXLoader();
+  loader.load(models_folder + 'chess/board.fbx', function ( object ) {
+    object.scale.multiplyScalar(BOARDSCALE);
+    object.position.copy(BOARDOFFSET);
+    scene.add(object);
+  }, function ( error ) {
+    console.error(error);
+  } );
+
+  // coords = {
+  //   king: ["e1", "e8"],
+  //   queen: ["d1", "d8"],
+  //   bishop: ["c1", "c8", "f1", "f8"],
+  //   knight: ["b1", "b8", "g1", "g8"],
+  //   rook: ["a1", "a8", "h1", "h8"],
+  //   pawn: ["a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7"]
+  // };
+  coords = {
+    king: [],
+    queen: [],
+    bishop: [],
+    knight: [],
+    rook: [],
+    pawn: []
+  };
+  var fen_split = board_fen.split(' ')[0].split('/');
+  var files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  var rank = 8;
+  for (let line of fen_split) {
+    var file = 0;
+    for (let i=0; i<line.length; i++) {
+      var c = line.charAt(i);
+      var n = parseInt(c);
+      var color;
+      if (isNaN(n)) {
+        var c_lower = c.toLowerCase();
+        if (c === c_lower) color = 'b';
+        else color = 'w';
+        switch (c_lower) {
+          case 'r':
+            coords.rook.push(`${files[file]}${rank}${color}`);
+            break;
+          case 'n':
+            coords.knight.push(`${files[file]}${rank}${color}`);
+            break;
+          case 'b':
+            coords.bishop.push(`${files[file]}${rank}${color}`);
+            break;
+          case 'q':
+            coords.queen.push(`${files[file]}${rank}${color}`);
+            break;
+          case 'k':
+            coords.king.push(`${files[file]}${rank}${color}`);
+            break;
+          case 'p':
+            coords.pawn.push(`${files[file]}${rank}${color}`);
+            break;
+        }
+        file += 1;
+      }
+      else {
+        file += n;
+      }
+    }
+    rank--;
+  }
+  console.log(coords);
+
+  for (let piece in coords) {
+    if (!coords.hasOwnProperty(piece)) continue;
+    if (coords[piece].length == 0) continue;
+
+    loader.load(models_folder + `chess/${piece}.fbx`, function ( object ) {
+      object.scale.multiplyScalar(BOARDSCALE);
+      for (let c of coords[piece]) {
+        var coord = c.substring(0, 2);
+        var color = c.charAt(2);
+        var o = object.clone()
+        o.position.copy(COORDTOPOS(coord, BOARDOFFSET, BOARDSCALE));
+        var rotation;
+        if (color === 'w') {
+          o.children[0].material = whiteMat;
+          rotation = new THREE.Euler(0, Math.PI/2, 0, 'XYZ');
+        }
+        else {
+          o.children[0].material = blackMat;
+          rotation = new THREE.Euler(0, -1*Math.PI/2, 0, 'XYZ');
+        }
+        o.rotation.copy(rotation);
+        scene.add(o);
+        chessObjs[coord] = o;
+      }
+    }, function ( error ) {
+      console.error(error);
+    } );
+  }
+}
+
+function movePiece(from, to) {
+  iterations = Math.round(FPS*PIECEMOVESPEED);
+  obj = chessObjs[from];
+  initialPos = obj.position;
+  finalPos = COORDTOPOS(to, BOARDOFFSET, BOARDSCALE);
+  capturedObj = null;
+  if (to in chessObjs) {
+    capturedObj = chessObjs[to];
+  }
+  movingPieces.push(
+    {
+      object: obj,
+      captured: capturedObj,
+      finalPos: finalPos,
+      iterations: iterations,
+      motion: finalPos.clone().sub(initialPos).divideScalar(iterations)
+    }
+  );
+  chessObjs[to] = obj;
+  delete chessObjs[from];
+}
+
+function removeObj(obj) {
+  if (obj.children.length > 0) {
+    for (let c of obj.children) {
+      c.geometry.dispose();
+      c.material.dispose();
+    }
+  }
+  else {
+    obj.geometry.dispose();
+    obj.material.dispose();
+  }
+  scene.remove( obj );
+}
+
+function addUser(name) {
   var geo = new THREE.SphereBufferGeometry(2, 16, 16);
   var mat = new THREE.MeshBasicMaterial( {color: new THREE.Color(GETNAMECOLOR(name))} );
   var mesh = new THREE.Mesh(geo, mat);
@@ -208,19 +383,17 @@ function addUser(scene, name) {
   userObjs[name] = mesh;
 }
 
-function removeUser(scene, name) {
-  scene.remove( userObjs[name] );
+function removeUser(name) {
+  o = userObjs[name];
+  removeObj(o);
   delete userObjs[name];
 }
 
-function getScene() {
-  var scene = new THREE.Scene();
+function initScene() {
+  scene = new THREE.Scene();
 
-  addWorld(scene);
-
-  scene.onAfterRender = () =>  {
-
-  }
-
-  return scene;
+  addWorld();
+  // scene.onAfterRender = () =>  {
+  //
+  // }
 }
