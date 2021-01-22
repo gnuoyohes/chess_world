@@ -213,12 +213,11 @@ var movePieces = function () {
 				o.object.position.copy(o.finalPos);
 				movingPieces.splice(i, 1);
 				capturedObj = o.captured;
-				if (capturedObj) {
-					removeObj(capturedObj);
-				}
+				if (capturedObj) removeObj(capturedObj);
 			}
 			else {
 				o.object.position.add(o.motion);
+				if (o.captured) o.captured.children[0].material.opacity -= o.opacityDiff;
 				o.iterations--;
 			}
 		}

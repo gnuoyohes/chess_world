@@ -204,11 +204,15 @@ function addWorld() {
 function addChessboard(board_fen) {
   const whiteMat = new THREE.MeshLambertMaterial( {
     color: new THREE.Color(0xffffff),
-    emissive: new THREE.Color(0x696969)
+    emissive: new THREE.Color(0x696969),
+    transparent: true,
+    opacity: 1.0
   } );
   const blackMat = new THREE.MeshLambertMaterial( {
     color: new THREE.Color(0x262626),
-    emissive: new THREE.Color(0x000000)
+    emissive: new THREE.Color(0x000000),
+    transparent: true,
+    opacity: 1.0
   } );
 
   switch (WORLD) {
@@ -248,15 +252,7 @@ function addChessboard(board_fen) {
     console.error(error);
   } );
 
-  // coords = {
-  //   king: ["e1", "e8"],
-  //   queen: ["d1", "d8"],
-  //   bishop: ["c1", "c8", "f1", "f8"],
-  //   knight: ["b1", "b8", "g1", "g8"],
-  //   rook: ["a1", "a8", "h1", "h8"],
-  //   pawn: ["a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7"]
-  // };
-  coords = {
+  var coords = {
     king: [],
     queen: [],
     bishop: [],
@@ -316,15 +312,16 @@ function addChessboard(board_fen) {
       for (let c of coords[piece]) {
         var coord = c.substring(0, 2);
         var color = c.charAt(2);
-        var o = object.clone()
+        var o = object.clone();
+        o.name = piece;
         o.position.copy(COORDTOPOS(coord, BOARDOFFSET, BOARDSCALE));
         var rotation;
         if (color === 'w') {
-          o.children[0].material = whiteMat;
+          o.children[0].material = whiteMat.clone();
           rotation = new THREE.Euler(0, Math.PI/2, 0, 'XYZ');
         }
         else {
-          o.children[0].material = blackMat;
+          o.children[0].material = blackMat.clone();
           rotation = new THREE.Euler(0, -1*Math.PI/2, 0, 'XYZ');
         }
         o.rotation.copy(rotation);
@@ -335,16 +332,24 @@ function addChessboard(board_fen) {
       console.error(error);
     } );
   }
+  whiteMat.dispose();
+  blackMat.dispose();
 }
 
 function movePiece(from, to) {
-  iterations = Math.round(FPS*PIECEMOVESPEED);
-  obj = chessObjs[from];
-  initialPos = obj.position;
-  finalPos = COORDTOPOS(to, BOARDOFFSET, BOARDSCALE);
-  capturedObj = null;
+  const iterations = Math.round(FPS*PIECEMOVESPEED);
+  var obj = chessObjs[from];
+  var initialPos = obj.position;
+  var finalPos = COORDTOPOS(to, BOARDOFFSET, BOARDSCALE);
+  var capturedObj = null;
   if (to in chessObjs) {
     capturedObj = chessObjs[to];
+  }
+  // check for en passant
+  if (obj.name === 'pawn' && from.charAt(0) !== to.charAt(0) && !capturedObj) {
+    var epCoord = `${to.charAt(0)}${from.charAt(1)}`;
+    capturedObj = chessObjs[epCoord];
+    delete chessObjs[epCoord];
   }
   movingPieces.push(
     {
@@ -352,7 +357,8 @@ function movePiece(from, to) {
       captured: capturedObj,
       finalPos: finalPos,
       iterations: iterations,
-      motion: finalPos.clone().sub(initialPos).divideScalar(iterations)
+      motion: finalPos.clone().sub(initialPos).divideScalar(iterations),
+      opacityDiff: 1.0 / iterations
     }
   );
   chessObjs[to] = obj;
@@ -384,7 +390,7 @@ function addUser(name) {
 }
 
 function removeUser(name) {
-  o = userObjs[name];
+  var o = userObjs[name];
   removeObj(o);
   delete userObjs[name];
 }
