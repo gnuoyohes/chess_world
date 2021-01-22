@@ -139,6 +139,7 @@ li {
   position: fixed;
   right: 33px;
   bottom: 270px;
+  display: none;
 }
 
 .chat {

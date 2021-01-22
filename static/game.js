@@ -214,6 +214,9 @@ var movePieces = function () {
 				movingPieces.splice(i, 1);
 				capturedObj = o.captured;
 				if (capturedObj) removeObj(capturedObj);
+				if (o.promote !== '') {
+					promote(o.to, o.promote);
+				}
 			}
 			else {
 				o.object.position.add(o.motion);

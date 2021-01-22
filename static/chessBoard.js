@@ -6,6 +6,7 @@ var isWhite = false;
 var isBlack = false;
 var recentMove = '';
 var gameOver = false;
+var promotionPiece = 'q';
 
 
 function removeGreySquares () {
@@ -41,12 +42,14 @@ function onDragStart (source, piece) {
 function onDrop (source, target) {
   removeGreySquares();
 
-  // see if the move is legal
-  var move = chessGame.move({
+  var moveCfg = {
     from: source,
     to: target,
-    promotion: 'q' // auto queen
-  });
+    promotion: promotionPiece
+  };
+
+  // see if the move is legal
+  var move = chessGame.move(moveCfg);
 
   // illegal move
   if (move === null) {
@@ -54,6 +57,12 @@ function onDrop (source, target) {
   }
   else {
     recentMove = `${source}${target}`;
+    console.log(move);
+
+    // check for promotion
+    if (move.flags.includes('p')) {
+         recentMove += promotionPiece;
+    }
   }
 }
 
@@ -106,10 +115,12 @@ function checkForGameOver () {
     gameOver = true;
     const winner = chessGame.turn() === 'w' ? 'black' : 'white';
     $("#gameOver").html(`Game over: ${winner} wins`);
+    $("#gameOver").show();
   }
   else if (chessGame.in_draw()) {
     gameOver = true;
     $("#gameOver").html("Game over: draw");
+    $("#gameOver").show();
   }
 }
 
@@ -124,6 +135,14 @@ var config = {
   onSnapEnd: onSnapEnd
 };
 chessBoard = Chessboard('myBoard', config);
+
+// const promotionTip = $('#promotion-tip');
+//
+// tippy('#myBoard', {
+//   content: promotionTip.html(),
+//   allowHTML: true,
+//   interactive: true
+// });
 
 
 // socket handlers
@@ -163,7 +182,9 @@ SOCKET.on('move', move => {
   // move 3D piece
   const source = move.substring(0, 2);
   const target = move.substring(2, 4);
-  movePiece(source, target);
+  var promote = '';
+  if (move.length > 4) promote = move.charAt(4);
+  movePiece(source, target, promote);
 });
 
 SOCKET.on('draw', () => {

@@ -206,13 +206,15 @@ function addChessboard(board_fen) {
     color: new THREE.Color(0xffffff),
     emissive: new THREE.Color(0x696969),
     transparent: true,
-    opacity: 1.0
+    opacity: 1.0,
+    name: 'white',
   } );
   const blackMat = new THREE.MeshLambertMaterial( {
     color: new THREE.Color(0x262626),
     emissive: new THREE.Color(0x000000),
     transparent: true,
-    opacity: 1.0
+    opacity: 1.0,
+    name: 'black',
   } );
 
   switch (WORLD) {
@@ -332,11 +334,9 @@ function addChessboard(board_fen) {
       console.error(error);
     } );
   }
-  whiteMat.dispose();
-  blackMat.dispose();
 }
 
-function movePiece(from, to) {
+function movePiece(from, to, promote) {
   const iterations = Math.round(FPS*PIECEMOVESPEED);
   var obj = chessObjs[from];
   var initialPos = obj.position;
@@ -355,14 +355,52 @@ function movePiece(from, to) {
     {
       object: obj,
       captured: capturedObj,
+      to: to,
       finalPos: finalPos,
       iterations: iterations,
       motion: finalPos.clone().sub(initialPos).divideScalar(iterations),
-      opacityDiff: 1.0 / iterations
+      opacityDiff: 1.0 / iterations,
+      promote: promote,
     }
   );
   chessObjs[to] = obj;
   delete chessObjs[from];
+}
+
+function promote(square, piece) {
+  var p;
+  switch (piece) {
+    case 'q':
+      p = 'queen';
+      break;
+    case 'r':
+      p = 'rook';
+      break;
+    case 'b':
+      p = 'bishop';
+      break;
+    case 'n':
+      p = 'knight';
+      break;
+    default:
+      p = 'queen';
+  }
+  var pawnObj = chessObjs[square];
+
+  var loader = new THREE.FBXLoader();
+  loader.load(models_folder + `chess/${p}.fbx`, function ( o ) {
+    o.scale.multiplyScalar(BOARDSCALE);
+    o.name = p;
+    o.position.copy(COORDTOPOS(square, BOARDOFFSET, BOARDSCALE));
+    o.children[0].material = pawnObj.children[0].material.clone();
+    o.rotation.copy(pawnObj.rotation);
+    scene.add(o);
+    chessObjs[square] = o;
+  }, function ( error ) {
+    console.error(error);
+  } );
+
+  removeObj(pawnObj);
 }
 
 function removeObj(obj) {
