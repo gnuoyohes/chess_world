@@ -241,6 +241,7 @@ function addChessboard(board_fen) {
     case 'Grass':
       BOARDOFFSET = new THREE.Vector3(0, 0.01, 0);
       BOARDSCALE = 6;
+      PIECEMOVESPEED = 1.6;
       break;
     default:
       BOARDOFFSET = new THREE.Vector3(0, 0, 0);

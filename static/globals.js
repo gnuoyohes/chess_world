@@ -16,7 +16,7 @@ const TYPING_TIMER_LENGTH = 400; // ms
 // chess board
 const WHITESQUAREGREY = '#a9a9a9';
 const BLACKSQUAREGREY = '#696969';
-const PIECEMOVESPEED = 0.8; // sec, approximate
+var PIECEMOVESPEED = 0.8; // sec, approximate
 var BOARDOFFSET;
 var BOARDSCALE;
 
